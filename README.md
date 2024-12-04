@@ -20,11 +20,10 @@ Java 21 ile birlikte gelen Project Loom  bu tip sorunlara çözüm sunuyor.**
 ## **Özellikler**
 
 - **Virtual Threads** kullanımı sayesinde:
-    - **Bloklama işlemlerinin etkili yönetimi.**
+    - **Bloklama işlemleri daha efektif kullanma.**
     - **Yüksek eşzamanlılık desteği (10.000+ işlem).**
     - **Azaltılmış bellek ve CPU kullanımı.**
 - Platform threads (mevcur java threadleri) ile karşılaştırmalı performans analizi.
-- Gerçek dünya senaryosu: Hesaplar arası para transferi.
 
 ---
 
