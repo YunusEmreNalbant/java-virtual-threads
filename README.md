@@ -27,6 +27,36 @@ Java 21 ile birlikte gelen Project Loom  bu tip sorunlara çözüm sunuyor.**
 
 ---
 
+## **Virtual Threads ile Eşzamanlı API Çağrısı (Örnek)**
+
+Bu projede Virtual Threads kullanılarak yüksek eşzamanlılıkta API çağrıları yapılabilmektedir. Projede, dış bir servisten **1'den 100'e kadar ID'lere** sahip veriler çekilmektedir.
+
+### **Kod Örneği**
+
+Bu kod, harici bir API'den paralel olarak 100 veri çeker ve Virtual Threads ile bu işlemi optimize eder:
+
+``` java
+List<String> apiEndpoints = IntStream.rangeClosed(1, 100)
+        .mapToObj(id -> "https://jsonplaceholder.typicode.com/posts/" + id)
+        .toList();
+
+try (ExecutorService virtualThreadExecutor = Executors.newVirtualThreadPerTaskExecutor()) {
+List<Future<String>> apiResponses = apiEndpoints.stream()
+        .map(endpoint -> virtualThreadExecutor.submit(() -> httpRequestUtil.sendGetRequest(endpoint)))
+        .toList();
+
+List<String> results = apiResponses.stream()
+        .map(future -> {
+          try {
+            return future.get();
+          } catch (Exception ex) {
+            throw new RuntimeException("API çağrısı başarısız: " + ex.getMessage());
+          }
+        }).toList();
+}
+```
+
+
 ### **Non-blocking'in Rolü ve Virtual Threads ile Farkı**
 
 - **Non-blocking:** Kod asenkron çalışır ve hiçbir noktada beklemez.
@@ -92,3 +122,17 @@ for i in {1..100}; do
   curl -X POST "http://localhost:8080/api/money-transfers?senderAccount=User$i&receiverAccount=User$((i+1))&amount=$i.00" &
 done
 ```
+
+### **3. Dış bir API İle Performans Ölçümü**
+
+Virtual Threads ve Platform Threads ile yapılan API çağrılarının performansını ölçmek için iki farklı endpoint bulunmaktadır:
+
+- **Virtual Threads:** `/api/external-data-virtual`
+- **Platform Threads:** `/api/external-data-platform`
+
+### **Örnek Çalıştırma**
+
+```bash
+curl "http://localhost:8080/api/external-data-virtual"
+curl "http://localhost:8080/api/external-data-platform"
+``
