@@ -56,6 +56,40 @@ List<String> results = apiResponses.stream()
 }
 ```
 
+## **Platform Threads ile Eşzamanlı API Çağrısı**
+
+Virtual Threads yerine Platform Threads kullanılarak da harici API çağrıları gerçekleştirilebilir. Ancak, bu yöntem fiziksel thread'lere bağımlı olduğundan, yüksek eşzamanlılık durumlarında kaynak tüketimi daha fazladır.
+
+### **Kod Örneği**
+
+Aşağıdaki kod, Fixed Thread Pool kullanılarak 1'den 100'e kadar ID'ler için paralel API çağrıları yapar:
+
+``` java
+List<String> apiEndpoints = IntStream.rangeClosed(1, 100)
+        .mapToObj(id -> "https://jsonplaceholder.typicode.com/posts/" + id)
+        .toList();
+
+ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(10);
+
+try {
+List<Future<String>> apiResponses = apiEndpoints.stream()
+        .map(endpoint -> threadPoolExecutor.submit(() -> httpRequestUtil.sendGetRequest(endpoint)))
+        .toList();
+
+List<String> results = apiResponses.stream()
+        .map(future -> {
+          try {
+            return future.get();
+          } catch (Exception ex) {
+            throw new RuntimeException("API çağrısı başarısız: " + ex.getMessage());
+          }
+        }).toList();
+} finally {
+        threadPoolExecutor.shutdown();
+}
+```
+Bu kod, Platform Threads kullanarak harici API çağrılarını eşzamanlı olarak gerçekleştirir. Ancak Fixed Thread Pool kullanımı nedeniyle fiziksel kaynak tüketimi (CPU ve bellek) daha yüksektir.
+
 
 ### **Non-blocking'in Rolü ve Virtual Threads ile Farkı**
 
@@ -95,6 +129,9 @@ mvn spring-boot:run
 ```
 
 ## **API Kullanımı**
+* Proje içerisinde **example1** ve **example2** klasörleri bulunmaktadır. 
+* example1 içerisindeki örnek dış bir servise istek atmaz. Tamamen simüle bir finansal işlem gerçekleştirir.
+* example2 içerisindeki örnek dış bir servise istek atmaktadır. PlatformThreads için ayrı bir kod, VirtualThreads için ayrı bir kod örneği yapıldı ve bunların performansları karşılaştırıldı.
 
 ### **1. Tekli Para Transferi**
 
@@ -135,4 +172,7 @@ Virtual Threads ve Platform Threads ile yapılan API çağrılarının performan
 ```bash
 curl "http://localhost:8080/api/external-data-virtual"
 curl "http://localhost:8080/api/external-data-platform"
-``
+```
+
+### Performans Karşılaştırması
+![platform-threads-vs-virtual-threads.png](platform-threads-vs-virtual-threads.png)
