@@ -1,6 +1,6 @@
-package com.yunusemrenalbant.virtualthreads.controller;
+package com.yunusemrenalbant.virtualthreads.example1.controller;
 
-import com.yunusemrenalbant.virtualthreads.service.MoneyTransferService;
+import com.yunusemrenalbant.virtualthreads.example1.service.MoneyTransferService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;

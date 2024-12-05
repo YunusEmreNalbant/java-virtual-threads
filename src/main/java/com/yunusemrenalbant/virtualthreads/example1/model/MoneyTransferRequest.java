@@ -1,4 +1,4 @@
-package com.yunusemrenalbant.virtualthreads.model;
+package com.yunusemrenalbant.virtualthreads.example1.model;
 
 import java.math.BigDecimal;
 

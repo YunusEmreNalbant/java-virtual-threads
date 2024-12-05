@@ -1,4 +1,4 @@
-package com.yunusemrenalbant.virtualthreads.service;
+package com.yunusemrenalbant.virtualthreads.example1.service;
 
 import org.springframework.stereotype.Service;
 
